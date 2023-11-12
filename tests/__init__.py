@@ -1,1 +1,2 @@
 from .ParserTesting import ParserTesting
+from .ListPropertyTesting import ListPropertyTesting
