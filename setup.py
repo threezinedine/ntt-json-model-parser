@@ -6,7 +6,7 @@ def load_readme():
 
 setup(
     name='ntt-json-model-parser',
-    version='1.0.0',
+    version='1.0.1',
     packages=find_packages(),
     install_requires=[
     ],
