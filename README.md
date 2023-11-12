@@ -6,22 +6,41 @@ The project for parsing the data from .json file (use json format) to a object i
 Firstly, define the model.
 
 ```python
-from ntt_json_model_parser import Parser, ModelProperty
+from ntt_json_model_parser import Parser, ModelProperty, Model, Property
 
 
+
+@Model
 class Lecture:
     def __init__(self) -> None:
-        self.strName = ""
-        self.nAttempts = 0
+        self._strName = ""
+        self._nAttempts = 0
 
+    @Property
+    def strName(self) -> str:
+        return self._strName
+
+    @Property
+    def nAttempts(self) -> int:
+        return self._nAttempts
+
+@Model
 class Person:
     def __init__(self) -> None:
-        self.strName = ""
-        self.nAge = 0
+        self._strName = ""
+        self._nAge = 0
 
         self._lecLecture : Lecture = Lecture()
 
-    @ModelProperty
+    @Property
+    def strName(self) -> str:
+        return self._strName
+
+    @Property
+    def nAge(self) -> int:
+        return self._nAge
+
+    @ModelProperty(Lecture)
     def lecLecture(self) -> Lecture:
         return self._lecLecture
 ```
