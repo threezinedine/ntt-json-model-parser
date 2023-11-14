@@ -6,6 +6,7 @@ from typing import (
 import types
 from .constants import *
 from .Signal import Signal
+from .ObservableList import ObservableList
 
 def Bind(self: object, strAttributeName: str, cbCallback: Callable) -> None:
     getattr(self, f"_{strAttributeName}_signal").AddCallback(cbCallback, bCalled=False)
@@ -41,6 +42,9 @@ def Property(func):
             setattr(instance, f"_{func.__name__}_signal", Signal(f"{func.__name__}"))
             strProperties.append(func.__name__)
             setattr(instance, PROPERTIES_LIST, strProperties)
+            if isinstance(obj, ObservableList):
+                obj.AttachSignal(getattr(instance, f"_{func.__name__}_signal"))
+
             getattr(instance, f"_{func.__name__}_signal").AttachSignal(
                 getattr(instance, f"_signal")
             )
@@ -80,7 +84,7 @@ def ModelProperty(claClassName, popup=False):
         return property(getter, setter)
     return wrapper
 
-def ModelListProperty(claPropertyType):
+def ModelListProperty(claPropertyType, popup=False):
     def wrapper(func):
         def getter(instance):
             obj = getattr(instance, f"_{func.__name__}")
@@ -88,13 +92,12 @@ def ModelListProperty(claPropertyType):
             if func.__name__ not in dictProperties:
                 dictProperties[func.__name__] = claPropertyType
                 setattr(instance, MODEL_LIST_PROPERTIES_DICT, dictProperties)
-                setattr(instance, f"_{func.__name__}_signal", Signal())
+                setattr(instance, f"_{func.__name__}_signal", obj._signal)
+
+                if popup:
+                    getattr(instance, f"_{func.__name__}_signal").AttachSignal(getattr(instance, f"_signal"))
             return obj
 
-        def setter(instance, value):
-            setattr(instance, f"_{func.__name__}", value)
-            getattr(instance, f"_{func.__name__}_signal").Emit()
-
-        return property(getter, setter)
+        return property(getter)
 
     return wrapper

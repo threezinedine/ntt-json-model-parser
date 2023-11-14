@@ -27,12 +27,21 @@ class Signal:
         for cbCallback in cbCallbacks:
             self.AddCallback(cbCallback, bCalled=bCalled)
 
+    def RemoveCallback(self, cbCallback: Callable) -> None:
+        self._cbCallbacks.remove(cbCallback)
+    
+    def Clear(self) -> None:
+        self._cbCallbacks = []
+
     def AttachSignal(self, signal) -> None:
         self._followedSignals.append(signal)
+
+    def DetachSignal(self, signal) -> None:
+        self._followedSignals.remove(signal)
 
     @property
     def Callbacks(self) -> List[Callable]:
         return self._cbCallbacks
 
     def __repr__(self) -> str:
-        return f"<Signal name=\"{self._strName}\" />"
+        return f"<Signal name=\"{self._strName}\" at {id(self)}/>"

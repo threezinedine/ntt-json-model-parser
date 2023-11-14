@@ -6,6 +6,7 @@ from typing import (
 )
 import json
 from .constants import *
+from .ObservableList import ObservableList
 
 
 class Parser:
@@ -27,18 +28,22 @@ class Parser:
     @staticmethod
     def _LoadAttributeByKeyAndValue(obj: object, key: str, value: Any) -> None:
         if key in getattr(obj, PROPERTIES_LIST):
-            setattr(obj, key, value)
+            if isinstance(value, list):
+                lst = getattr(obj, key)
+                for element in value:
+                    lst.append(element)
+            else:
+                setattr(obj, key, value)
         elif key in getattr(obj, MODEL_PROPERTIES_DICT):
             Parser.DeSerializeFromDict(getattr(obj, key), value)
         elif key in getattr(obj, MODEL_LIST_PROPERTIES_DICT):
             claPropertyType = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
-            lValues = []
+            lValues = getattr(obj, key)
 
             for oElement in value:
                 claObj = claPropertyType()
                 Parser.DeSerializeFromDict(claObj, oElement)
                 lValues.append(claObj)
-            setattr(obj, key, lValues)
 
     @staticmethod
     def DeSerializeFromFile(claClassName: Callable, strFileName: str) -> Any:
