@@ -48,7 +48,8 @@ class ListPropertyTesting(unittest.TestCase):
             ]
         }
 
-        uUser: User = Parser.DeSerializeFromDict(User, dictObjectData)
+        uUser = User() 
+        Parser.DeSerializeFromDict(uUser, dictObjectData)
 
         self.assertEqual(
             uUser.strName, 
@@ -56,6 +57,7 @@ class ListPropertyTesting(unittest.TestCase):
         )
 
         skiSkills: List[Skill] = uUser.skiSkills
+        print(skiSkills)
 
         self.assertIsNotNone(skiSkills)
         self.assertEqual(skiSkills[0].strName, "Programming")

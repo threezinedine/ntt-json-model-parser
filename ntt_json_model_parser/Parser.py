@@ -10,9 +10,7 @@ from .constants import *
 
 class Parser:
     @staticmethod
-    def DeSerializeFromDict(claClassName: Callable, dictObjectData: dict) -> Any:
-        obj = claClassName()
-
+    def DeSerializeFromDict(obj: object, dictObjectData: dict) -> Any:
         if dictObjectData is not None:
             for key, value in dictObjectData.items():
                 if value is None:
@@ -31,14 +29,15 @@ class Parser:
         if key in getattr(obj, PROPERTIES_LIST):
             setattr(obj, key, value)
         elif key in getattr(obj, MODEL_PROPERTIES_DICT):
-            claPropertyType = getattr(obj, MODEL_PROPERTIES_DICT)[key]
-            setattr(obj, key, Parser.DeSerializeFromDict(claPropertyType, value))
+            Parser.DeSerializeFromDict(getattr(obj, key), value)
         elif key in getattr(obj, MODEL_LIST_PROPERTIES_DICT):
             claPropertyType = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
             lValues = []
 
             for oElement in value:
-                lValues.append(Parser.DeSerializeFromDict(claPropertyType, oElement))
+                claObj = claPropertyType()
+                Parser.DeSerializeFromDict(claObj, oElement)
+                lValues.append(claObj)
             setattr(obj, key, lValues)
 
     @staticmethod

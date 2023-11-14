@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 from ntt_json_model_parser import Parser, ModelProperty, Property, Model
 
 
@@ -17,12 +18,22 @@ class Lecture:
         return self._nAttempts
 
 @Model
+class Score:
+    def __init__(self) -> None:
+        self._nScore = 8
+
+    @Property
+    def nScore(self) -> int:
+        return self._nScore
+
+@Model
 class Person:
     def __init__(self) -> None:
         self._strName = ""
         self._nAge = 0
 
         self._lecLecture : Lecture = Lecture()
+        self._scoScore: Score() = Score()
 
     @Property
     def strName(self) -> str:
@@ -35,7 +46,11 @@ class Person:
     @ModelProperty(Lecture)
     def lecLecture(self) -> Lecture:
         return self._lecLecture
-    
+
+    @ModelProperty(Score, popup=True)
+    def scoScore(self) -> Score:
+        return self._scoScore
+
 
 class ParserTesting(unittest.TestCase):
     def test_ConvertFromDictToObject(self):
@@ -44,7 +59,8 @@ class ParserTesting(unittest.TestCase):
             "nAge": 23,
         }
 
-        perFirstStudent: Person = Parser.DeSerializeFromDict(Person, dictObjectData)
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
 
         self.assertEqual(
             perFirstStudent.strName,
@@ -66,7 +82,8 @@ class ParserTesting(unittest.TestCase):
             }
         }
 
-        perFirstStudent: Person = Parser.DeSerializeFromDict(Person, dictObjectData)
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
 
         self.assertEqual(
             perFirstStudent.lecLecture.strName,
@@ -85,7 +102,8 @@ class ParserTesting(unittest.TestCase):
             "lecLecture": None
         }
 
-        perFirstStudent: Person = Parser.DeSerializeFromDict(Person, dictObjectData)
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
 
         self.assertEqual(
             perFirstStudent.lecLecture.strName,
@@ -102,7 +120,8 @@ class ParserTesting(unittest.TestCase):
             "nAge": 23,
         }
 
-        perFirstStudent: Person = Parser.DeSerializeFromDict(Person, dictObjectData)
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
 
         dictSerializedData = Parser.SerializeToDict(perFirstStudent)
 
@@ -114,6 +133,55 @@ class ParserTesting(unittest.TestCase):
                 "lecLecture": {
                     "strName": "",
                     "nAttempts": 0
-                }
+                },
+                "scoScore": {
+                    "nScore": 8,
+                },
             }
         )
+
+    def test_AddTheCallbackForCheckingChangeInTheNameAttribute(self):
+        dictObjectData = {
+            "strName": "Thao Nguyen The",
+            "nAge": 23,
+        }
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
+        testCallback = Mock()
+        perFirstStudent.Bind("strName", testCallback)
+
+        perFirstStudent.strName = "Testing"
+
+        testCallback.assert_called_once()
+
+    def test_ObjectPropertyChangedThenTheClassObjectIsNotified(self):
+        dictObjectData = {
+            "nScore": 7,
+        }
+        scoScore = Score() 
+        Parser.DeSerializeFromDict(scoScore, dictObjectData)
+        testCallback = Mock()
+        getattr(scoScore, f"_signal").AddCallback(testCallback, bCalled=False)
+
+        scoScore.nScore = 3
+
+        testCallback.assert_called_once()
+
+
+    def test_TheCallbackIsPopup(self):
+        dictObjectData = {
+            "strName": "Thao Nguyen The",
+            "nAge": 23,
+            "scoScore": {
+                "nScore": 9,
+            },
+        }
+        perFirstStudent = Person() 
+        Parser.DeSerializeFromDict(perFirstStudent, dictObjectData)
+        testCallback = Mock()
+
+        perFirstStudent.Bind("scoScore", testCallback)
+
+        perFirstStudent.scoScore.nScore = 10
+
+        testCallback.assert_called_once()
