@@ -88,5 +88,5 @@ class Parser:
     def SerializeToFile(obj: Any, strTargetFile: str) -> None:
         dictObjectData = Parser.SerializeToDict(obj) 
 
-        with (strTargetFile, "w") as file:
+        with open(strTargetFile, "w") as file:
             json.dump(dictObjectData, file, indent=4)
