@@ -42,5 +42,12 @@ class ObservableList(list):
         self._signal.Emit()
         return super().pop(__index)
 
+    def clear(self) -> None:
+        self._signal.Emit()
+        return super().clear()
+
+    def _ClearWithoutNotifying(self) -> None:
+        super().clear()
+
     def __repr__(self) -> str:
         return f"<Observable List {super().__repr__()} at {id(self)}/>"

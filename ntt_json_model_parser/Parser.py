@@ -30,6 +30,7 @@ class Parser:
         if key in getattr(obj, PROPERTIES_LIST):
             if isinstance(value, list):
                 lst = getattr(obj, key)
+                lst._ClearWithoutNotifying()
                 for element in value:
                     lst.append(element)
             else:
@@ -39,6 +40,7 @@ class Parser:
         elif key in getattr(obj, MODEL_LIST_PROPERTIES_DICT):
             claPropertyType = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
             lValues = getattr(obj, key)
+            lValues._ClearWithoutNotifying()
 
             for oElement in value:
                 claObj = claPropertyType()
