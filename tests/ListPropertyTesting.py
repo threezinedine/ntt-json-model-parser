@@ -42,11 +42,11 @@ class User:
     def strExNames(self) -> ObservableList:
         return self._strExNames
 
-    @ModelListProperty([Skill])
+    @ModelListProperty()
     def skiSkills(self) -> ObservableList:
         return self._skiSkills
 
-    @ModelListProperty([Skill], popup=True)
+    @ModelListProperty(popup=True)
     def skiObservableSkills(self) -> ObservableList:
         return self._skiObservableSkills
 

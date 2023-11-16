@@ -38,8 +38,7 @@ class Parser:
                 setattr(obj, key, value)
         elif key in getattr(obj, MODEL_PROPERTIES_LIST):
             Parser.DeSerializeFromDict(getattr(obj, key), value)
-        elif key in getattr(obj, MODEL_LIST_PROPERTIES_DICT):
-            lstClasses = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
+        elif key in getattr(obj, MODEL_LIST_PROPERTIES_LIST):
             lValues = getattr(obj, key)
             lValues._ClearWithoutNotifying()
 
@@ -90,7 +89,7 @@ class Parser:
 
     @staticmethod
     def _SerialModelListProperties(obj: object, dictObjectData: dict) -> None:
-        strModelProperties: List[str] = getattr(obj, MODEL_LIST_PROPERTIES_DICT).keys()
+        strModelProperties: List[str] = getattr(obj, MODEL_LIST_PROPERTIES_LIST)
 
         for strProperty in strModelProperties:
             mModels: List[object] = getattr(obj, strProperty)

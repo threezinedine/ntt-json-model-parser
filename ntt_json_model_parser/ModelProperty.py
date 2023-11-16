@@ -24,8 +24,8 @@ def Model(claClass):
         obj = claClass(*args, **kwargs)
 
         setattr(obj, PROPERTIES_LIST, [])
-        setattr(obj, MODEL_PROPERTIES_LIST, {})
-        setattr(obj, MODEL_LIST_PROPERTIES_DICT, {})
+        setattr(obj, MODEL_PROPERTIES_LIST, [])
+        setattr(obj, MODEL_LIST_PROPERTIES_LIST, [])
 
         strAttributeNames: List[str] = list(filter(lambda x: not x.startswith("_"), dir(obj)))
 
@@ -72,7 +72,7 @@ def ModelProperty(popup=False):
 
             dictProperties: list = getattr(instance, MODEL_PROPERTIES_LIST)
             if func.__name__ not in dictProperties:
-                dictProperties[func.__name__] = obj.__class__
+                dictProperties.append(func.__name__)
                 setattr(instance, MODEL_PROPERTIES_LIST, dictProperties)
 
                 if popup:
@@ -93,15 +93,14 @@ def ModelProperty(popup=False):
         return property(getter, setter)
     return wrapper
 
-def ModelListProperty(classes, popup=False):
+def ModelListProperty(popup=False):
     def wrapper(func):
         def getter(instance):
-            print(classes)
             obj = getattr(instance, f"_{func.__name__}")
-            dictProperties: dict = getattr(instance, MODEL_LIST_PROPERTIES_DICT)
+            dictProperties: dict = getattr(instance, MODEL_LIST_PROPERTIES_LIST)
             if func.__name__ not in dictProperties:
-                dictProperties[func.__name__] = classes
-                setattr(instance, MODEL_LIST_PROPERTIES_DICT, dictProperties)
+                dictProperties.append(func.__name__)
+                setattr(instance, MODEL_LIST_PROPERTIES_LIST, dictProperties)
                 setattr(instance, f"_{func.__name__}_signal", obj._signal)
 
                 if popup:
