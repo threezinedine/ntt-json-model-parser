@@ -7,6 +7,7 @@ from typing import (
 import json
 from .constants import *
 from .ObservableList import ObservableList
+from .ModelProperty import ModelRepo
 
 
 class Parser:
@@ -35,17 +36,25 @@ class Parser:
                     lst.append(element)
             else:
                 setattr(obj, key, value)
-        elif key in getattr(obj, MODEL_PROPERTIES_DICT):
+        elif key in getattr(obj, MODEL_PROPERTIES_LIST):
             Parser.DeSerializeFromDict(getattr(obj, key), value)
         elif key in getattr(obj, MODEL_LIST_PROPERTIES_DICT):
-            claPropertyType = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
+            lstClasses = getattr(obj, MODEL_LIST_PROPERTIES_DICT)[key]
             lValues = getattr(obj, key)
             lValues._ClearWithoutNotifying()
 
             for oElement in value:
-                claObj = claPropertyType()
-                Parser.DeSerializeFromDict(claObj, oElement)
-                lValues.append(claObj)
+                strClassName = oElement["__class__"]
+                claObj = ModelRepo.claTypes[strClassName]()
+                if claObj is not None:
+                    Parser.DeSerializeFromDict(claObj, oElement)
+                    lValues.append(claObj)
+
+    @staticmethod
+    def _GetClass(strClassName: str, lstClasses: List[callable]) -> callable:
+        for classObj in lstClasses:
+            if strClassName == classObj.__class__.__name__:
+                return classObj
 
     @staticmethod
     def DeSerializeFromFile(claClassName: Callable, strFileName: str) -> Any:
@@ -70,10 +79,11 @@ class Parser:
 
         for strProperty in strNormalProperties:
             dictObjectData[strProperty] = getattr(obj, strProperty)
+            dictObjectData["__class__"] = obj.__class__.__name__
 
     @staticmethod
     def _SerialModelProperties(obj: object, dictObjectData: dict) -> None:
-        strModelProperties: List[str] = getattr(obj, MODEL_PROPERTIES_DICT).keys()
+        strModelProperties: List[str] = getattr(obj, MODEL_PROPERTIES_LIST)
 
         for strProperty in strModelProperties:
             dictObjectData[strProperty] = Parser.SerializeToDict(getattr(obj, strProperty))

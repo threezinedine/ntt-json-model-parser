@@ -42,31 +42,42 @@ class User:
     def strExNames(self) -> ObservableList:
         return self._strExNames
 
-    @ModelListProperty(Skill)
+    @ModelListProperty([Skill])
     def skiSkills(self) -> ObservableList:
         return self._skiSkills
 
-    @ModelListProperty(Skill, popup=True)
+    @ModelListProperty([Skill], popup=True)
     def skiObservableSkills(self) -> ObservableList:
         return self._skiObservableSkills
 
 
 class ListPropertyTesting(unittest.TestCase):
-    def test_ExtractListProperty(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                }
-            ]
-        }
+    dictObjectData = {
+        "__class__": "User",
+        "strName": "Thao Nguyen The",
+        "strNickNames": ["biu", "threezinedine"],
+        "skiSkills": [
+            {
+                "__class__": "Skill",
+                "strName": "Programming"
+            },
+            {
+                "__class__": "Skill",
+                "strName": "Singing"
+            }
+        ],
+        "strExNames": [],
+        "skiObservableSkills": [
+            {
+                "__class__": "Skill",
+                "strName": "Testing"
+            }
+        ],
+    }
 
+    def test_ExtractListProperty(self):
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         self.assertEqual(
             uUser.strName, 
@@ -98,13 +109,16 @@ class ListPropertyTesting(unittest.TestCase):
         self.assertDictEqual(
             dictObjectData,
             {
+                "__class__": "User",
                 "strName": "Nguyen The Thao",
                 "strNickNames": ["biu", "threezinedine"],
                 "skiSkills": [
                     {
+                        "__class__": "Skill",
                         "strName": "Math",
                     },
                     {
+                        "__class__": "Skill",
                         "strName": "Programming",
                     }
                 ],
@@ -114,21 +128,9 @@ class ListPropertyTesting(unittest.TestCase):
         )
 
     def test_ListIsObservable(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "strNickNames": ["biu", "threezinedine"],
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                }
-            ]
-        }
         testCallback = Mock()
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         uUser.skiSkills.Bind(testCallback)
 
@@ -138,21 +140,9 @@ class ListPropertyTesting(unittest.TestCase):
         self.assertEqual(testCallback.call_count, 2)
 
     def test_ListNonModelPropertyIsObservable(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "strNickNames": ["biu", "threezinedine"],
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                }
-            ]
-        }
         testCallback = Mock()
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         uUser.strNickNames.Bind(testCallback)
 
@@ -164,20 +154,9 @@ class ListPropertyTesting(unittest.TestCase):
         self.assertEqual(testCallback.call_count, 4)
 
     def test_ModelObservableListDoesNotEmitTheParentObjectAsDefault(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                }
-            ]
-        }
         testCallback = Mock()
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         uUser.Bind("strNickNames", testCallback)
 
@@ -188,25 +167,9 @@ class ListPropertyTesting(unittest.TestCase):
         testCallback.assert_not_called()
 
     def test_ModelObservableListEmitsTheParentObject(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                },
-            ],
-            "skiObservableSkills": [
-                {
-                    "strName": "Testing"
-                }
-            ]
-        }
         testCallback = Mock()
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         uUser.Bind("skiObservableSkills", testCallback)
 
@@ -222,20 +185,9 @@ class ListPropertyTesting(unittest.TestCase):
         self.assertEqual(testCallback.call_count, 5)
 
     def test_NonModelObservableListEmitsTheParentObject(self):
-        dictObjectData = {
-            "strName": "Thao Nguyen The",
-            "skiSkills": [
-                {
-                    "strName": "Programming"
-                },
-                {
-                    "strName": "Singing"
-                }
-            ]
-        }
         testCallback = Mock()
         uUser = User() 
-        Parser.DeSerializeFromDict(uUser, dictObjectData)
+        Parser.DeSerializeFromDict(uUser, self.dictObjectData)
 
         uUser.Bind("strExNames", testCallback)
 

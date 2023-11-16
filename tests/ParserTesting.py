@@ -43,11 +43,11 @@ class Person:
     def nAge(self) -> int:
         return self._nAge
 
-    @ModelProperty(Lecture)
+    @ModelProperty()
     def lecLecture(self) -> Lecture:
         return self._lecLecture
 
-    @ModelProperty(Score, popup=True)
+    @ModelProperty(popup=True)
     def scoScore(self) -> Score:
         return self._scoScore
 
@@ -55,6 +55,7 @@ class Person:
 class ParserTesting(unittest.TestCase):
     def test_ConvertFromDictToObject(self):
         dictObjectData = {
+            "__class__": "Person",
             "strName": "Thao Nguyen The",
             "nAge": 23,
         }
@@ -74,9 +75,11 @@ class ParserTesting(unittest.TestCase):
 
     def test_ConvertFromDictWithNestingObject(self):
         dictObjectData = {
+            "__class__": "Person",
             "strName": "Thao Nguyen The",
             "nAge": 23,
             "lecLecture": {
+                "__class__": "Lecture",
                 "strName": "Math",
                 "nAttempts": 3,
             }
@@ -116,6 +119,7 @@ class ParserTesting(unittest.TestCase):
 
     def test_ConvertFromObjectToDict(self):
         dictObjectData = {
+            "__class__": "Person",
             "strName": "Thao Nguyen The",
             "nAge": 23,
         }
@@ -128,13 +132,16 @@ class ParserTesting(unittest.TestCase):
         self.assertDictEqual(
             dictSerializedData,
             {
+                "__class__": "Person",
                 "strName": "Thao Nguyen The",
                 "nAge": 23,
                 "lecLecture": {
+                    "__class__": "Lecture",
                     "strName": "",
                     "nAttempts": 0
                 },
                 "scoScore": {
+                    "__class__": "Score",
                     "nScore": 8,
                 },
             }
@@ -142,6 +149,7 @@ class ParserTesting(unittest.TestCase):
 
     def test_AddTheCallbackForCheckingChangeInTheNameAttribute(self):
         dictObjectData = {
+            "__class__": "Person",
             "strName": "Thao Nguyen The",
             "nAge": 23,
         }
@@ -156,6 +164,7 @@ class ParserTesting(unittest.TestCase):
 
     def test_ObjectPropertyChangedThenTheClassObjectIsNotified(self):
         dictObjectData = {
+            "__class__": "Score",
             "nScore": 7,
         }
         scoScore = Score() 
@@ -170,6 +179,7 @@ class ParserTesting(unittest.TestCase):
 
     def test_TheCallbackIsPopup(self):
         dictObjectData = {
+            "__class__": "Score",
             "strName": "Thao Nguyen The",
             "nAge": 23,
             "scoScore": {

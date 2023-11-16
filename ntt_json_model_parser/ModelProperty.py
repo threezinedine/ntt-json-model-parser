@@ -2,22 +2,29 @@ from typing import (
     Any,
     List,
     Callable,
+    Dict,
 )
 import types
 from .constants import *
 from .Signal import Signal
 from .ObservableList import ObservableList
 
+
+class ModelRepo:
+    claTypes: Dict[str, Callable[..., Any]] = {}
+
+
 def Bind(self: object, strAttributeName: str, cbCallback: Callable) -> None:
     getattr(self, f"_{strAttributeName}_signal").AddCallback(cbCallback, bCalled=False)
 
 
 def Model(claClass):
+
     def wrapper(*args, **kwargs):
         obj = claClass(*args, **kwargs)
 
         setattr(obj, PROPERTIES_LIST, [])
-        setattr(obj, MODEL_PROPERTIES_DICT, {})
+        setattr(obj, MODEL_PROPERTIES_LIST, {})
         setattr(obj, MODEL_LIST_PROPERTIES_DICT, {})
 
         strAttributeNames: List[str] = list(filter(lambda x: not x.startswith("_"), dir(obj)))
@@ -30,7 +37,9 @@ def Model(claClass):
         obj.Bind = types.MethodType(Bind, obj) 
 
         return obj
-        
+
+    ModelRepo.claTypes[claClass.__name__] = wrapper
+
     return wrapper
 
 
@@ -56,15 +65,15 @@ def Property(func):
 
     return property(getter, setter)
 
-def ModelProperty(claClassName, popup=False):
+def ModelProperty(popup=False):
     def wrapper(func):
         def getter(instance):
             obj = getattr(instance, f"_{func.__name__}")
 
-            dictProperties: list = getattr(instance, MODEL_PROPERTIES_DICT)
+            dictProperties: list = getattr(instance, MODEL_PROPERTIES_LIST)
             if func.__name__ not in dictProperties:
-                dictProperties[func.__name__] = claClassName
-                setattr(instance, MODEL_PROPERTIES_DICT, dictProperties)
+                dictProperties[func.__name__] = obj.__class__
+                setattr(instance, MODEL_PROPERTIES_LIST, dictProperties)
 
                 if popup:
                     setattr(instance, 
@@ -84,13 +93,14 @@ def ModelProperty(claClassName, popup=False):
         return property(getter, setter)
     return wrapper
 
-def ModelListProperty(claPropertyType, popup=False):
+def ModelListProperty(classes, popup=False):
     def wrapper(func):
         def getter(instance):
+            print(classes)
             obj = getattr(instance, f"_{func.__name__}")
             dictProperties: dict = getattr(instance, MODEL_LIST_PROPERTIES_DICT)
             if func.__name__ not in dictProperties:
-                dictProperties[func.__name__] = claPropertyType
+                dictProperties[func.__name__] = classes
                 setattr(instance, MODEL_LIST_PROPERTIES_DICT, dictProperties)
                 setattr(instance, f"_{func.__name__}_signal", obj._signal)
 
